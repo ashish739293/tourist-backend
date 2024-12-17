@@ -5,8 +5,8 @@ const errorHandler = (res, statusCode, message) => {
   return res.status(statusCode).json({ message });
 };
 
-const verifyToken = async (req, res, next) => {
-  const token = req.headers.authorization;
+export const verifyToken = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Extract the token from the "Bearer" prefix
 
   if (!token) {
     return errorHandler(res, 401, 'No token provided');
@@ -14,9 +14,9 @@ const verifyToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded._id; // Use _id as userId
+    const userId = decoded.userId; // Use userId from token
 
-    // Fetch the user from the database using the userId (_id)
+    // Fetch the user from the database using the userId
     const user = await User.findById(userId);
 
     if (!user) {
@@ -26,7 +26,7 @@ const verifyToken = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error(error);
+    console.error("Error in token verification:", error.message);
     return errorHandler(res, 401, 'Invalid token');
   }
 };
@@ -40,6 +40,7 @@ export const verifyUser = (req, res, next) => {
 };
 
 export const verifyAdmin = (req, res, next) => {
+
   if (req.user && req.user.role === 'admin') {
     next();
   } else {

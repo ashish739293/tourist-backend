@@ -33,7 +33,7 @@ export const updateTour = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Failed to update tour" });
-  }
+  } 
 };
 
 // delete tour
